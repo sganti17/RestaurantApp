@@ -26,7 +26,7 @@ export default class MapContainer extends Component {
             const { google } = this.props; // sets props equal to google
             const maps = google.maps; // sets maps to google maps props
             const infowindow = new google.maps.InfoWindow();
-            
+
             const mapRef = this.refs.map; // looks for HTML div ref 'map'. Returned in render below.
             const node = ReactDOM.findDOMNode(mapRef); // finds the 'map' div in the React DOM, names it node
 
@@ -37,8 +37,8 @@ export default class MapContainer extends Component {
             })
 
             this.map = new maps.Map(node, mapConfig); // creates a new Google map on the specified node (ref='map') with the specified configuration set above.
-
             
+            const map = this.map;
             
                 if(navigator.geolocation){
                     navigator.geolocation.getCurrentPosition(function(position){
@@ -46,9 +46,9 @@ export default class MapContainer extends Component {
                             lat: position.coords.latitude,
                             lng: position.coords.longitude
                         };
-                        
                         infowindow.setPosition(pos);
                         infowindow.setContent('Location found');
+                        console.log(pos)
                         infowindow.open(map);
                         map.setCenter(pos);
                     },function(){
