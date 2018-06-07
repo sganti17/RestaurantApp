@@ -4,9 +4,6 @@ import ReactDOM from 'react-dom'
 
 export default class MapContainer extends Component {
 
-    // ======================
-    // ADD LOCATIONS TO STATE
-    // ======================
     state = {
         locations: [
             { name: "New York County Supreme Court", location: { lat: 40.7143033, lng: -74.0036919 } },
@@ -28,7 +25,8 @@ export default class MapContainer extends Component {
         if (this.props && this.props.google) { // checks to make sure that props have been passed
             const { google } = this.props; // sets props equal to google
             const maps = google.maps; // sets maps to google maps props
-
+            const infowindow = new google.maps.InfoWindow();
+            
             const mapRef = this.refs.map; // looks for HTML div ref 'map'. Returned in render below.
             const node = ReactDOM.findDOMNode(mapRef); // finds the 'map' div in the React DOM, names it node
 
@@ -40,9 +38,36 @@ export default class MapContainer extends Component {
 
             this.map = new maps.Map(node, mapConfig); // creates a new Google map on the specified node (ref='map') with the specified configuration set above.
 
-            // ==================
-            // ADD MARKERS TO MAP
-            // ==================
+            
+            
+                if(navigator.geolocation){
+                    navigator.geolocation.getCurrentPosition(function(position){
+                        var pos = {
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude
+                        };
+                        
+                        infowindow.setPosition(pos);
+                        infowindow.setContent('Location found');
+                        infowindow.open(map);
+                        map.setCenter(pos);
+                    },function(){
+                        handleLocationError(true, infowindow, map.getCenter());
+                });
+            }
+            else{
+                    handleLocationError(false, infowindow, map.getCenter());
+                }
+
+            
+
+            function handleLocationError(browserHasGeolocation, infowindow, pos){
+                infowindow.setPosition(pos);
+                infowindow.setContent(browserHasGeolocation ? 'Error,geolocation service failed':
+                                                     'Error, browser doesnt support geolocation');
+                infowindow.open(map);
+            }
+          
             //   this.state.locations.forEach( location => { // iterate through locations saved in state
             //     const marker = new google.maps.Marker({ // creates a new Google maps Marker object.
             //       position: {lat: location.location.lat, lng: location.location.lng}, // sets position of marker to specified location
@@ -62,25 +87,10 @@ export default class MapContainer extends Component {
         }
 
         return ( // in our return function you must return a div with ref='map' and style.
-            <div ref="map" style={style}>
+            <div ref="map"  style={style}>
                 loading map...
       </div>
         )
 
-        Map.propTypes = {
-            google: React.PropTypes.object,
-            zoom: React.PropTypes.number,
-            initialCenter: React.PropTypes.object,
-            centerAroundCurrentLocation: React.PropTypes.bool
-        }
-        Map.defaultProps = {
-            zoom: 13,
-            // San Francisco, by default
-            initialCenter: {
-                lat: 37.774929,
-                lng: -122.419416
-            },
-            centerAroundCurrentLocation: false
-        }
     }
 }
